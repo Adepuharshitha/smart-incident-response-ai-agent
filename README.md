@@ -1,20 +1,39 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://ai.google.dev/static/site-assets/images/share-ais-513315318.png" />
-</div>
+# Smart Incident Response AI Agent
 
-# Run and deploy your AI Studio app
+## AI Model Used
+- Google Gemini 2.5 Flash
+- Google AI Studio API
 
-This contains everything you need to run your app locally.
+## Tech Stack
+- React
+- TypeScript
+- Node.js
+- Google AI Studio (Gemini API)
+- Vite
 
-View your app in AI Studio: https://ai.studio/apps/c7e002ec-c6d9-4708-9014-e5b40bba0a63
+## Features
+- AI-powered incident analysis
+- Severity classification
+- Response recommendations
+- Incident report generation
 
-## Run Locally
+## Setup
 
-**Prerequisites:**  Node.js
+1. Clone the repository
+2. Install dependencies
 
+```bash
+npm install
+```
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+3. Create a `.env` file
+
+```env
+GEMINI_API_KEY=your_api_key
+```
+
+4. Run
+
+```bash
+npm run dev
+```
