@@ -1,0 +1,8 @@
+{
+  "name": "Smart Incident Response AI Agent",
+  "description": "An intelligent incident response assistant featuring persistent Hindsight memory and budget-aware cascadeflow model routing for fast, cost-effective troubleshooting.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

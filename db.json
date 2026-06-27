@@ -1,0 +1,168 @@
+{
+  "users": [
+    {
+      "email": "harshithaadepu06@gmail.com",
+      "name": "Harshitha Adepu",
+      "avatar": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=120&q=80",
+      "role": "Lead DevOps Engineer",
+      "preferences": {
+        "routingStrategy": "balanced",
+        "autoRemember": true,
+        "defaultTags": [
+          "prod",
+          "k8s"
+        ]
+      }
+    },
+    {
+      "email": "engineer@cascade.io",
+      "name": "Alex Rivera",
+      "avatar": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=120&q=80",
+      "role": "Site Reliability Engineer",
+      "preferences": {
+        "routingStrategy": "budget",
+        "autoRemember": true,
+        "defaultTags": [
+          "prod",
+          "cloud"
+        ]
+      }
+    }
+  ],
+  "memories": [
+    {
+      "id": "mem_oom_payment",
+      "title": "OOM Killer in Payment batch-service",
+      "description": "OutOfMemoryError: Java heap space during high-throughput end-of-month payment batch runs.",
+      "errorSignature": "java.lang.OutOfMemoryError: Java heap space",
+      "rootCause": "Memory leak in the XML payload parser. The batch processor was keeping all processed items in an in-memory ArrayList cache instead of stream-writing to DB, eventually exceeding the 2GB heap allocation.",
+      "resolution": "Migrated ProcessEngine cache from list collection to a reactive cursor Stream. Configured Jackson XML stream-writer to release memory segments per chunk. Added JVM heap option: -XX:+UseG1GC -XX:+ExitOnOutOfMemoryError.",
+      "tags": [
+        "java",
+        "oom",
+        "payment-service",
+        "memory-leak"
+      ],
+      "confidence": 96,
+      "engineerFeedback": "correct",
+      "feedbackNote": "Applying G1GC and streaming fixed the recurring 2 AM batch crashes completely.",
+      "timestamp": "2026-06-25T04:12:11.000Z"
+    },
+    {
+      "id": "mem_postgres_pool",
+      "title": "PostgreSQL Connection Pool Exhaustion",
+      "description": "database connection pool exhausted. Active connections: 100, Idle: 0. Timeout waiting for connection.",
+      "errorSignature": "database connection pool exhausted. Active connections: 100",
+      "rootCause": "Database transactions in verifySession were un-indexed, causing individual queries to hold connections for up to 8 seconds during traffic surges. This quickly saturated the HikariCP max-pool limit of 100.",
+      "resolution": "Created composite index on sessions(user_id, session_token) to drop query times from 8000ms to 4ms. Reduced pool checkout timeout in Hikari from 30s to 5s. Optimized connection pool size to 150.",
+      "tags": [
+        "postgres",
+        "database",
+        "connection-pool",
+        "indexing"
+      ],
+      "confidence": 98,
+      "engineerFeedback": "helpful",
+      "feedbackNote": "The indexing resolved the root lag. The pool hasn't hit exhaustion since.",
+      "timestamp": "2026-06-26T05:01:23.000Z"
+    },
+    {
+      "id": "mem_redis_hangup",
+      "title": "Redis Connection Hangup and ECONNRESET",
+      "description": "Redis connection lost. Socket hang up. Error: read ECONNRESET",
+      "errorSignature": "ECONNRESET at TCP.onStreamRead",
+      "rootCause": "Cloud NAT Gateway aggressively terminates idle TCP socket connections after 350 seconds. The ioredis client held socket connections open indefinitely without sending traffic, leading to unexpected ECONNRESET hangups.",
+      "resolution": "Configured TCP Keep-Alive on the Redis socket driver and added pingInterval: 30000 (30 seconds) in client connection parameters to guarantee continuous minimal traffic.",
+      "tags": [
+        "redis",
+        "cache",
+        "network",
+        "timeout"
+      ],
+      "confidence": 92,
+      "engineerFeedback": "correct",
+      "feedbackNote": "Keep-alive ping totally cured the socket hangup warning issues.",
+      "timestamp": "2026-06-26T18:40:02.000Z"
+    }
+  ],
+  "history": [
+    {
+      "id": "hist_1",
+      "title": "OutOfMemoryError in batch engine",
+      "description": "java.lang.OutOfMemoryError: Java heap space on processBatch",
+      "stackTrace": "java.lang.OutOfMemoryError: Java heap space\n at com.payments.ProcessEngine.allocateBuffer(ProcessEngine.java:1024)\n at com.payments.ProcessEngine.processBatch(ProcessEngine.java:245)",
+      "rootCause": "XML payload parsing batches are fully cached in memory rather than stream-flushed, depleting heap limits.",
+      "resolution": "Stream-write records to DB using G1GC and cursor chunk stream processing.",
+      "tags": [
+        "java",
+        "oom",
+        "payment-service"
+      ],
+      "confidence": 94,
+      "isMemoryHit": false,
+      "modelUsed": "gemini-3.1-pro-preview",
+      "cost": 0.0185,
+      "latency": 4120,
+      "timestamp": "2026-06-25T04:15:30.000Z",
+      "userEmail": "harshithaadepu06@gmail.com"
+    },
+    {
+      "id": "hist_2",
+      "title": "Postgres Connection Failure",
+      "description": "database connection pool exhausted active: 100 waiting timeout",
+      "rootCause": "Slow transaction in session verification due to lack of composite index on session logs.",
+      "resolution": "Create composite index on sessions(user_id, session_token) and reduce connection timeout to 5s.",
+      "tags": [
+        "postgres",
+        "database",
+        "connection-pool"
+      ],
+      "confidence": 97,
+      "isMemoryHit": false,
+      "modelUsed": "gemini-3.5-flash",
+      "cost": 0.0014,
+      "latency": 2240,
+      "timestamp": "2026-06-26T05:05:10.000Z",
+      "userEmail": "engineer@cascade.io"
+    }
+  ],
+  "audits": [
+    {
+      "id": "aud_1",
+      "timestamp": "2026-06-25T04:12:11.000Z",
+      "incidentTitle": "OutOfMemoryError in batch engine",
+      "inputType": "log_file",
+      "inputSize": 18450,
+      "selectedModel": "gemini-3.1-pro-preview",
+      "routingReason": "Massive log trace and nested stack frames detected. Routed to Gemini 3.1 Pro for deep structural analysis.",
+      "cost": 0.0185,
+      "latency": 4120,
+      "escalated": true,
+      "escalationReason": "Escalated from Gemini 3.5 Flash because stack frame nested depth exceeded 15 calls.",
+      "budgetCap": 10,
+      "cumulativeCostAfter": 0.0185
+    },
+    {
+      "id": "aud_2",
+      "timestamp": "2026-06-26T05:01:23.000Z",
+      "incidentTitle": "Postgres Connection Failure",
+      "inputType": "stacktrace",
+      "inputSize": 2100,
+      "selectedModel": "gemini-3.5-flash",
+      "routingReason": "Moderate stack trace and database exhaustion logs. Routed to Gemini 3.5 Flash for balanced logical inference.",
+      "cost": 0.0014,
+      "latency": 2240,
+      "escalated": false,
+      "budgetCap": 10,
+      "cumulativeCostAfter": 0.0199
+    }
+  ],
+  "metrics": {
+    "totalIncidentsAnalyzed": 42,
+    "memoryHits": 18,
+    "totalCostSaved": 0.45,
+    "averageLatency": 1250,
+    "budgetLimit": 10,
+    "budgetConsumed": 0.0199
+  }
+}
